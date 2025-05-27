@@ -1,0 +1,34 @@
+% Processing of impulses responses
+% 1. Get omni signal, by converting A-format to B-format
+% 2. Convolve with inverse sweep, get impulse response
+% 3. Calculate acoustical parameters
+
+%% 0: CLEARING WORKSPACE & WINDOWS AND START TIMER
+clear all; close all;
+tic
+
+% 1. Get omni signal
+% If 1 channel, already omni
+% If there are 4 channels, Ambeo
+% If there are 19 channels, Zylia
+% If there are 64 channels, Eigenmike 64
+
+%% 1.1: LOADING RELEVANT FILES 
+InvSweep = audioread('./Audio_Files/INV-ESS.wav');      % Inverse sweep required for the deconvolution process
+MicArrayEnc = audioread('./Audio_files/EM64-to-Ambix-5th-order-Eigenstudio-Standard.wav');       % Characterization of the microphone (Beamforming matrix)
+addpath( './Lib' )   
+Fs              = 48e3;             % Sampling rate [Hz]
+L               = 0.5;              % Length of each IR in the SIMO matrix [s]
+N               = Fs*L;             % Samples of each IR in the SIMO matrix
+%ambisonicsOrder = 3;                % Ideally should be read from the microphone convolution matrix
+%outputChannels = (ambisonicsOrder + 1)^2;
+recordedFile = audioread("./example-inputs/290425-T001.WAV");
+
+% Assume we only have 1 channel
+Mic = 1;
+
+IR = zeros(1,Mic,N);  
+hMic=beam(Mic,outputChannels,4096,MicArrayEnc);  % Beamforming matrix for the Zylia microphone [RMic x VMic x N]
+
+
+
