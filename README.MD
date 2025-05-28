@@ -4,6 +4,7 @@ Based on https://github.com/xorgol/MIMO_Matlab
 
 Run eigenmike.m for the EM64, select a folder, it will process every .w64 file in its subfolders.
 You can also edit line 99 to process .wav files.
+It will put the resulting files in an "output" folder, placed in the path that was given as its input.
 
 Run agora_automated.m for the Zoom F8, where channels 1-4 are assumed to be the Ambeo, channels 5-6 are the Neumann dummy head, channel 7 is the Behringer omni.
 This one is not as well tested, so I haven't implemented batch processing of entire folders, you need to write the path to the file that you want to process on line 17.
