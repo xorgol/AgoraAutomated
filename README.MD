@@ -10,7 +10,9 @@ This one is not as well tested, so I haven't implemented batch processing of ent
 The most common problem is with the trimming, if the file contains the tail of the previous sweep it can select the wrong part.
 This is very noticeable in the graph, if you notice it you can just trim the file before processing.
 
+This is wrong:
 ![wrong](wrong.png)
+And this is right:
 ![correct](correct.png)
 
 Both scripts convolve with the inverse sweep, then apply appropriate A-to-B convolution matrices.
