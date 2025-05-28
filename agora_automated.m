@@ -28,7 +28,7 @@ N               = Fs*L;             % Samples of each IR in the SIMO matrix
 [RecSweep, Fs] = audioread(filename);
 
 % Assume we only have 1 channel
-Mic = 1;
+Mic = 7;
 %outputChannels = 1;
 
 IR = zeros(1,Mic,N);  
@@ -47,10 +47,13 @@ for m = 1:Mic
     if (m==1)
         TrimSample = trimIR(convRes,N,filename);
     end
+
+    % Distribute the multiple IRs into separate cells of SIMO matrix
+    IR(1,m,:) = convRes(TrimSample:TrimSample+N-1);
 end 
 
 % trim
-IR = convRes(TrimSample:TrimSample+N-1);
+% IR = convRes(TrimSample:TrimSample+N-1);
 
     
 
@@ -60,24 +63,25 @@ IR = convRes(TrimSample:TrimSample+N-1);
 
 % Impulse respones (IRs) Normalization
 mx=max(max(abs(IR)));
-mx
+
 scalar=factor/mx;
-IR=IR'*scalar;
+IR=IR*scalar;
 
 % Export
-outname = filename+"IR.wav"
-audiowrite(outname,IR,Fs,"BitsPerSample",32); % Further information of this sub-routine at https://github.com/xorgol/MIMO_Matlab
+IR=squeeze(IR);
+outname = filename+"IR.wav";
+audiowrite(outname,IR',Fs,"BitsPerSample",32); % Further information of this sub-routine at https://github.com/xorgol/MIMO_Matlab
 
 % Application of Acoupar tool. Further information of this executable at https://www.angelofarina.it/Public/AcouPar/
 
 % Windows Version
-command = "./AcouPar_omni_x64.exe " + sprintf('"%s"',outname);
+% command = "AcouPar_omni_x64.exe " + sprintf('"%s"',outname);
 
 % Mac or Linux Version
 % setenv('PATH', [getenv('PATH') ':/opt/homebrew/bin/wine/']);
 % command = "wine AcouPar_omni_x64.exe " + sprintf('"%s"',outname);
 
 
-fprintf("%s\n", command);
-[status, results] = system(command);
-fprintf("%s\n", results);
+%fprintf("%s\n", command);
+%[status, results] = system(command);
+%fprintf("%s\n", results);
