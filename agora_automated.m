@@ -12,7 +12,7 @@ tic
 InvSweep = audioread('./Audio_Files/INV-ESS.wav');      % Inverse sweep required for the deconvolution process
 %MicArrayEnc = audioread('./Audio_files/EM64-to-Ambix-5th-order-Eigenstudio-Standard.wav');       % Characterization of the microphone (Beamforming matrix)
 MicArrayEnc = audioread('./Audio_files/Ambeo-Ambix.wav');
-filename = "./example-inputs/290425-T001.WAV";
+filename = "./example-inputs/170325-T002-trim.wav";
 
 
 addpath( './Lib' )   
@@ -23,8 +23,6 @@ N               = Fs*L;             % Samples of each IR in the SIMO matrix
 [RecSweep, Fs] = audioread(filename);
 
 Mic = 7;
-
-
 IR = zeros(1,Mic,N);  
 
 % Performs deconvolution for each Mic 
@@ -89,16 +87,16 @@ audiowrite(outname,selectedIR,Fs,"BitsPerSample",32);
 %% Application of Acoupar tool. Further information of this executable at https://www.angelofarina.it/Public/AcouPar/
 
 % Omni Acoustical Parameters
-% command = "AcouPar_omni_x64.exe " + sprintf('"%s"',OmniOutname);
-%fprintf("%s\n", command);
-%[status, results] = system(command);
-%fprintf("%s\n", results);
+command = "AcouPar_omni_x64.exe " + sprintf('"%s"',OmniOutname);
+fprintf("%s\n", command);
+[status, results] = system(command);
+fprintf("%s\n", results);
 
 % Binaural Acoustical Parameters
-% command = "AcouPar_bin_x64.exe " + sprintf('"%s"',OmniOutname);
-%fprintf("%s\n", command);
-%[status, results] = system(command);
-%fprintf("%s\n", results);
+command = "AcouPar_bin_x64.exe " + sprintf('"%s"',OmniOutname);
+fprintf("%s\n", command);
+[status, results] = system(command);
+fprintf("%s\n", results);
 
 % Pressure-Velocity Acoustical Parameters, using the W and Y channels of
 % Ambix
