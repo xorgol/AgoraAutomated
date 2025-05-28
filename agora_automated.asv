@@ -16,19 +16,72 @@ tic
 %% 1.1: LOADING RELEVANT FILES 
 InvSweep = audioread('./Audio_Files/INV-ESS.wav');      % Inverse sweep required for the deconvolution process
 MicArrayEnc = audioread('./Audio_files/EM64-to-Ambix-5th-order-Eigenstudio-Standard.wav');       % Characterization of the microphone (Beamforming matrix)
+
+filename = "./example-inputs/290425-T001.WAV";
+
 addpath( './Lib' )   
 Fs              = 48e3;             % Sampling rate [Hz]
-L               = 0.5;              % Length of each IR in the SIMO matrix [s]
+L               = 2;              % Length of each IR in the SIMO matrix [s]
 N               = Fs*L;             % Samples of each IR in the SIMO matrix
 %ambisonicsOrder = 3;                % Ideally should be read from the microphone convolution matrix
 %outputChannels = (ambisonicsOrder + 1)^2;
-recordedFile = audioread("./example-inputs/290425-T001.WAV");
+[RecSweep, Fs] = audioread(filename);
 
 % Assume we only have 1 channel
-Mic = 1;
+Mic = 7;
+%outputChannels = 1;
 
 IR = zeros(1,Mic,N);  
-hMic=beam(Mic,outputChannels,4096,MicArrayEnc);  % Beamforming matrix for the Zylia microphone [RMic x VMic x N]
+%hMic=beam(Mic,outputChannels,4096,MicArrayEnc);  % Beamforming matrix for the Zylia microphone [RMic x VMic x N]
 
 
+% Performs deconvolution for each Mic 
+%convRes = fd_conv(RecSweep(:,1), InvSweep);
+for m = 1:Mic
+    fprintf('Mic: (%d/%d)\n',m,Mic);
 
+    % Deconvolution of each channel of the mic with the inverse sweep
+    convRes = fd_conv( RecSweep(:,m), InvSweep );   % Further information of this sub-routine at https://github.com/xorgol/MIMO_Matlab
+    
+    % Show the first trimmed IR in order to check the process
+    if (m==1)
+        TrimSample = trimIR(convRes,N,filename);
+    end
+
+    % Distribute the multiple IRs into separate cells of SIMO matrix
+    IR(1,m,:) = convRes(TrimSample:TrimSample+N-1);
+end 
+
+% trim
+% IR = convRes(TrimSample:TrimSample+N-1);
+
+    
+
+%% NORMALIZE
+    % Normalization factor
+    factor=0.9;
+
+% Impulse respones (IRs) Normalization
+mx=max(max(abs(IR)));
+
+scalar=factor/mx;
+IR=IR*scalar;
+
+% Export
+IR=squeeze(IR);
+outname = filename+"IR.wav";
+audiowrite(outname,IR',Fs,"BitsPerSample",32); % Further information of this sub-routine at https://github.com/xorgol/MIMO_Matlab
+
+% Application of Acoupar tool. Further information of this executable at https://www.angelofarina.it/Public/AcouPar/
+
+% Windows Version
+% command = "AcouPar_omni_x64.exe " + sprintf('"%s"',outname);
+
+% Mac or Linux Version
+% setenv('PATH', [getenv('PATH') ':/opt/homebrew/bin/wine/']);
+% command = "wine AcouPar_omni_x64.exe " + sprintf('"%s"',outname);
+
+
+%fprintf("%s\n", command);
+%[status, results] = system(command);
+%fprintf("%s\n", results);
