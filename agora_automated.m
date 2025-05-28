@@ -14,24 +14,20 @@ InvSweep = audioread('./Audio_Files/INV-ESS.wav');      % Inverse sweep required
 MicArrayEnc = audioread('./Audio_files/Ambeo-Ambix.wav');
 filename = "./example-inputs/290425-T001.WAV";
 
+
 addpath( './Lib' )   
 Fs              = 48e3;             % Sampling rate [Hz]
 L               = 2;              % Length of each IR in the SIMO matrix [s]
 N               = Fs*L;             % Samples of each IR in the SIMO matrix
-%ambisonicsOrder = 3;                % Ideally should be read from the microphone convolution matrix
-%outputChannels = (ambisonicsOrder + 1)^2;
+
 [RecSweep, Fs] = audioread(filename);
 
-% Assume we only have 1 channel
 Mic = 7;
-%outputChannels = 1;
+
 
 IR = zeros(1,Mic,N);  
-%hMic=beam(Mic,outputChannels,4096,MicArrayEnc);  % Beamforming matrix for the Zylia microphone [RMic x VMic x N]
-
 
 % Performs deconvolution for each Mic 
-%convRes = fd_conv(RecSweep(:,1), InvSweep);
 for m = 1:Mic
     fprintf('Mic: (%d/%d)\n',m,Mic);
 
@@ -61,39 +57,52 @@ IR=IR*scalar;
 
 % Export all 7 channels
 IR=squeeze(IR);
-outname = filename+"IR.wav";
-audiowrite(outname,IR',Fs,"BitsPerSample",32); % Further information of this sub-routine at https://github.com/xorgol/MIMO_Matlab
+TotalOutname = filename+"IR.wav";
+audiowrite(TotalOutname,IR',Fs,"BitsPerSample",32); % Further information of this sub-routine at https://github.com/xorgol/MIMO_Matlab
 
 % Export binaural IR (ch5-6)
-outname = filename+"-binaural-IR.wav";
+BinauralOutname = filename+"-binaural-IR.wav";
 rowIR = IR';
 selectedIR = rowIR(:,5:6);
-audiowrite(outname,selectedIR,Fs,"BitsPerSample",32); 
+audiowrite(BinauralOutname,selectedIR,Fs,"BitsPerSample",32); 
 
 % Export Behringer omni (ch7)
-outname = filename+"-omni-IR.wav";
+OmniOutname = filename+"-omni-IR.wav";
 selectedIR = rowIR(:,7);
-audiowrite(outname,selectedIR,Fs,"BitsPerSample",32); 
+audiowrite(OmniOutname,selectedIR,Fs,"BitsPerSample",32); 
 
 % Ambeo A-format to B-format
-AmbixIR = IR(1:4,:);
-AmbixIR = AmbixIR';
-AmbixIR = fd_conv(AmbixIR', MicArrayEnc);
+AmbixIR = IR(:,1:4);
+AmbixIR = squeeze(AmbixIR);
+fprintf("AmbixIR size = ");
+size(AmbixIR)
+%size(MicArrayEnc')
+MicArrayEnc = MicArrayEnc';
+%size(MicArrayEnc)
+AmbixIR = matrix_conv(AmbixIR, MicArrayEnc);
+
 % Export Ambeo B-format IR
 outname = filename+"-Ambix-IR.wav";
 selectedIR = AmbixIR';
 audiowrite(outname,selectedIR,Fs,"BitsPerSample",32);
 
-% Application of Acoupar tool. Further information of this executable at https://www.angelofarina.it/Public/AcouPar/
+%% Application of Acoupar tool. Further information of this executable at https://www.angelofarina.it/Public/AcouPar/
 
-% Windows Version
-% command = "AcouPar_omni_x64.exe " + sprintf('"%s"',outname);
+% Omni Acoustical Parameters
+% command = "AcouPar_omni_x64.exe " + sprintf('"%s"',OmniOutname);
+%fprintf("%s\n", command);
+%[status, results] = system(command);
+%fprintf("%s\n", results);
 
-% Mac or Linux Version
-% setenv('PATH', [getenv('PATH') ':/opt/homebrew/bin/wine/']);
-% command = "wine AcouPar_omni_x64.exe " + sprintf('"%s"',outname);
+% Binaural Acoustical Parameters
+% command = "AcouPar_bin_x64.exe " + sprintf('"%s"',OmniOutname);
+%fprintf("%s\n", command);
+%[status, results] = system(command);
+%fprintf("%s\n", results);
 
-
+% Pressure-Velocity Acoustical Parameters, using the W and Y channels of
+% Ambix
+% command = "AcouPar_omni_x64.exe " + sprintf('"%s"',OmniOutname);
 %fprintf("%s\n", command);
 %[status, results] = system(command);
 %fprintf("%s\n", results);

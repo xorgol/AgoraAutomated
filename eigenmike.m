@@ -231,7 +231,7 @@ for j = 1 : nfiles  % Iterates through all files in the target folder
 
     check=outnames(6);
 
-    clear RecSweep convRes convResTrim AMBI3IR SIMOIR % Variables are cleared for the next iteration
+    %clear RecSweep convRes convResTrim AMBI3IR SIMOIR % Variables are cleared for the next iteration
 
     close all
 end

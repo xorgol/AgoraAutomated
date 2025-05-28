@@ -11,8 +11,11 @@ tic
 %% 1: LOADING RELEVANT FILES 
 InvSweep = audioread('./Audio_Files/INV-ESS.wav');      % Inverse sweep required for the deconvolution process
 %MicArrayEnc = audioread('./Audio_files/EM64-to-Ambix-5th-order-Eigenstudio-Standard.wav');       % Characterization of the microphone (Beamforming matrix)
-MicArrayEnc = audioread('./Audio_files/EM64-to-Ambix-5th-order-Eigenstudio-Standard.wav');
+MicArrayEnc = audioread('./Audio_files/Ambeo-Ambix.wav');
 filename = "./example-inputs/290425-T001.WAV";
+
+hAmbeo=beam(Mic,outputChannels,4096,ZyliaEnc);  % Beamforming matrix for the Zylia microphone [RMic x VMic x N]
+
 
 addpath( './Lib' )   
 Fs              = 48e3;             % Sampling rate [Hz]
@@ -76,10 +79,14 @@ selectedIR = rowIR(:,7);
 audiowrite(outname,selectedIR,Fs,"BitsPerSample",32); 
 
 % Ambeo A-format to B-format
-AmbixIR = fd_conv(IR(:,1:4), MicArrayEnc);
+AmbixIR = IR(1:4,:);
+AmbixIR = AmbixIR';
+MicArrayEnc = MicArrayEnc';
+AmbixIR = fd_conv(AmbixIR, MicArrayEnc);
 % Export Ambeo B-format IR
 outname = filename+"-Ambix-IR.wav";
-selectedIR = 
+selectedIR = AmbixIR';
+audiowrite(outname,selectedIR,Fs,"BitsPerSample",32);
 
 % Application of Acoupar tool. Further information of this executable at https://www.angelofarina.it/Public/AcouPar/
 
