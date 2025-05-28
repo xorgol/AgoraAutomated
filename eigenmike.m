@@ -64,7 +64,7 @@ tic
 %% 2: LOADING RELEVANT FILES 
 % todo: rename Zylia variables to more generic Ambisonics microphone array
 % nomenclature
-InvSweep = audioread('INV-ESS.wav');      % Inverse sweep required for the deconvolution process
+InvSweep = audioread('./Audio_files/INV-ESS.wav');      % Inverse sweep required for the deconvolution process
 ZyliaEnc = audioread('./Audio_files/EM64-to-Ambix-5th-order-Eigenstudio-Standard.wav');       % Characterization of the microphone (Beamforming matrix)
 addpath( './Lib' )                                                  % Add to path the folder 'Lib' with required functions
 
@@ -105,26 +105,27 @@ filesinfo([filesinfo.isdir]) = [];
 nfiles = length(filesinfo);      
 
 %% 5: APPLICATION OF INVERSE FILTER
-for InvFilt=0:1
-    delete acoupar_pu.txt                                       % Reset ".txt" with acoustic parameters in each iteration
-
-    if InvFilt == 0
-        Filter=1;                                               % No inverse filter (array with just a one).
-        lap="\n\n1st Round: Not applying inverse filter.\n"; 
-    else
-        %Filter=audioread('Audio files/DD4-Invfilt-ret.wav')';   % Inverse filter of the DD4 sound source.
-        Filter=audioread('Audio files/SPS12ToDodecMIMO.wav')';
-        lap="\n\n2º Round: Applying inverse filter.\n"; 
-    end
-
+% for InvFilt=0:1
+%     delete acoupar_pu.txt                                       % Reset ".txt" with acoustic parameters in each iteration
+% 
+%     if InvFilt == 0
+%         Filter=1;                                               % No inverse filter (array with just a one).
+%         lap="\n\n1st Round: Not applying inverse filter.\n"; 
+%     else
+%         %Filter=audioread('Audio files/DD4-Invfilt-ret.wav')';   % Inverse filter of the DD4 sound source.
+%         Filter=audioread('Audio files/SPS12ToDodecMIMO.wav')';
+%         lap="\n\n2º Round: Applying inverse filter.\n"; 
+%     end
+Filter = 1;
 hSpk=ones(1,1,length(Filter));                                  % Three-dimensional array (for future deconvolution processes) to store the inverse filter 
 hSpk(1,1,:)=Filter;                                             % The inverse filter's length is set as long as the IRs    
 
 %% 6: IR DECONVOLUTION
 for j = 1 : nfiles  % Iterates through all files in the target folder
-    fprintf(lap); 
+    %fprintf(lap); 
     fprintf("Processing file %d out of %d\n\n", j, nfiles);
 
+    InvFilt=0;
     % Loads files (sweep recordings) and creates output folder for the resulting files
     [filename,outnames,suffix] = directories_v3(DirName,filesinfo,j,InvFilt);
 
@@ -235,9 +236,9 @@ for j = 1 : nfiles  % Iterates through all files in the target folder
 
     close all
 end
-        copyfile('acoupar_pu.txt',sprintf('acoupar_pu_%s.txt',suffix))  % Creates a new ".txt" considering whether the inverse filter has been applied or not
-        movefile(sprintf('acoupar_pu_%s.txt',suffix),check)             % Moves this new ".txt" to its corresponding directory
-end
+%         copyfile('acoupar_pu.txt',sprintf('acoupar_pu_%s.txt',suffix))  % Creates a new ".txt" considering whether the inverse filter has been applied or not
+%         movefile(sprintf('acoupar_pu_%s.txt',suffix),check)             % Moves this new ".txt" to its corresponding directory
+% end
 
 %% 10: FINAL STEPS
 fprintf("\n\nDone, processed %d files\n", nfiles);
