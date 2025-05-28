@@ -1,5 +1,7 @@
 % Processing of impulses responses recorded on the Zoom F8
-% We have a 
+% channels 1-4: Ambeo
+% channels 5-6: dummy head
+% channel 7: Behringer omni
 % 1. Convolve with inverse sweep, get impulse response
 % 2. Get omni signal, by converting A-format to B-format
 % 3. Calculate acoustical parameters
@@ -84,6 +86,10 @@ outname = filename+"-Ambix-IR.wav";
 selectedIR = AmbixIR';
 audiowrite(outname,selectedIR,Fs,"BitsPerSample",32);
 
+WYoutname = filename+"-WY-IR.wav";
+selectedIR = selectedIR(:,1:2);
+audiowrite(outname,selectedIR,Fs,"BitsPerSample",32);
+
 %% Application of Acoupar tool. Further information of this executable at https://www.angelofarina.it/Public/AcouPar/
 
 % Omni Acoustical Parameters
@@ -93,16 +99,16 @@ fprintf("%s\n", command);
 fprintf("%s\n", results);
 
 % Binaural Acoustical Parameters
-command = "AcouPar_bin_x64.exe " + sprintf('"%s"',OmniOutname);
+command = "AcouPar_bin_x64.exe " + sprintf('"%s"',BinauralOutname);
 fprintf("%s\n", command);
 [status, results] = system(command);
 fprintf("%s\n", results);
 
 % Pressure-Velocity Acoustical Parameters, using the W and Y channels of
 % Ambix
-% command = "AcouPar_omni_x64.exe " + sprintf('"%s"',OmniOutname);
-%fprintf("%s\n", command);
-%[status, results] = system(command);
-%fprintf("%s\n", results);
+command = "AcouPar_pu_x64.exe " + sprintf('"%s"',WYoutname);
+fprintf("%s\n", command);
+[status, results] = system(command);
+fprintf("%s\n", results);
 
 toc
