@@ -14,7 +14,7 @@ tic
 InvSweep = audioread('./Audio_Files/INV-ESS.wav');      % Inverse sweep required for the deconvolution process
 %MicArrayEnc = audioread('./Audio_files/EM64-to-Ambix-5th-order-Eigenstudio-Standard.wav');       % Characterization of the microphone (Beamforming matrix)
 MicArrayEnc = audioread('./Audio_files/Ambeo-Ambix.wav');
-filename = "./example-inputs/170325-T002-trim.wav";
+filename = "./example-inputs/170325-T002.wav";
 
 
 addpath( './Lib' )   

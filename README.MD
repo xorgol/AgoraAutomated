@@ -10,6 +10,9 @@ This one is not as well tested, so I haven't implemented batch processing of ent
 The most common problem is with the trimming, if the file contains the tail of the previous sweep it can select the wrong part.
 This is very noticeable in the graph, if you notice it you can just trim the file before processing.
 
+![wrong](wrong.png)
+![correct](correct.png)
+
 Both scripts convolve with the inverse sweep, then apply appropriate A-to-B convolution matrices.
 
 Finally, both scripts compute the acoustical parameters using a compiled version of the Acoustical Parameters module from Aurora.
