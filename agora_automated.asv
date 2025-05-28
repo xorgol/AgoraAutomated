@@ -1,22 +1,17 @@
-% Processing of impulses responses
-% 1. Get omni signal, by converting A-format to B-format
-% 2. Convolve with inverse sweep, get impulse response
+% Processing of impulses responses recorded on the Zoom F8
+% We have a 
+% 1. Convolve with inverse sweep, get impulse response
+% 2. Get omni signal, by converting A-format to B-format
 % 3. Calculate acoustical parameters
 
 %% 0: CLEARING WORKSPACE & WINDOWS AND START TIMER
 clear all; close all;
 tic
 
-% 1. Get omni signal
-% If 1 channel, already omni
-% If there are 4 channels, Ambeo
-% If there are 19 channels, Zylia
-% If there are 64 channels, Eigenmike 64
-
-%% 1.1: LOADING RELEVANT FILES 
+%% 1: LOADING RELEVANT FILES 
 InvSweep = audioread('./Audio_Files/INV-ESS.wav');      % Inverse sweep required for the deconvolution process
-MicArrayEnc = audioread('./Audio_files/EM64-to-Ambix-5th-order-Eigenstudio-Standard.wav');       % Characterization of the microphone (Beamforming matrix)
-
+%MicArrayEnc = audioread('./Audio_files/EM64-to-Ambix-5th-order-Eigenstudio-Standard.wav');       % Characterization of the microphone (Beamforming matrix)
+MicArrayEnc = audioread('./Audio_files/EM64-to-Ambix-5th-order-Eigenstudio-Standard.wav');
 filename = "./example-inputs/290425-T001.WAV";
 
 addpath( './Lib' )   
@@ -58,19 +53,33 @@ end
     
 
 %% NORMALIZE
-    % Normalization factor
-    factor=0.9;
-
-% Impulse respones (IRs) Normalization
+% Normalization factor
+factor=0.9;
 mx=max(max(abs(IR)));
-
 scalar=factor/mx;
 IR=IR*scalar;
 
-% Export
+% Export all 7 channels
 IR=squeeze(IR);
 outname = filename+"IR.wav";
 audiowrite(outname,IR',Fs,"BitsPerSample",32); % Further information of this sub-routine at https://github.com/xorgol/MIMO_Matlab
+
+% Export binaural IR (ch5-6)
+outname = filename+"-binaural-IR.wav";
+rowIR = IR';
+selectedIR = rowIR(:,5:6);
+audiowrite(outname,selectedIR,Fs,"BitsPerSample",32); 
+
+% Export Behringer omni (ch7)
+outname = filename+"-omni-IR.wav";
+selectedIR = rowIR(:,7);
+audiowrite(outname,selectedIR,Fs,"BitsPerSample",32); 
+
+% Ambeo A-format to B-format
+AmbixIR = fd_conv(IR(:,1:4), MicArrayEnc);
+% Export Ambeo B-format IR
+outname = filename+"-Ambix-IR.wav";
+selectedIR = 
 
 % Application of Acoupar tool. Further information of this executable at https://www.angelofarina.it/Public/AcouPar/
 
@@ -85,3 +94,5 @@ audiowrite(outname,IR',Fs,"BitsPerSample",32); % Further information of this sub
 %fprintf("%s\n", command);
 %[status, results] = system(command);
 %fprintf("%s\n", results);
+
+toc

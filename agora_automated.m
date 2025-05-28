@@ -11,7 +11,7 @@ tic
 %% 1: LOADING RELEVANT FILES 
 InvSweep = audioread('./Audio_Files/INV-ESS.wav');      % Inverse sweep required for the deconvolution process
 %MicArrayEnc = audioread('./Audio_files/EM64-to-Ambix-5th-order-Eigenstudio-Standard.wav');       % Characterization of the microphone (Beamforming matrix)
-MicArrayEnc = audioread('./Audio_files/EM64-to-Ambix-5th-order-Eigenstudio-Standard.wav');
+MicArrayEnc = audioread('./Audio_files/Ambeo-Ambix.wav');
 filename = "./example-inputs/290425-T001.WAV";
 
 addpath( './Lib' )   
@@ -63,6 +63,26 @@ IR=IR*scalar;
 IR=squeeze(IR);
 outname = filename+"IR.wav";
 audiowrite(outname,IR',Fs,"BitsPerSample",32); % Further information of this sub-routine at https://github.com/xorgol/MIMO_Matlab
+
+% Export binaural IR (ch5-6)
+outname = filename+"-binaural-IR.wav";
+rowIR = IR';
+selectedIR = rowIR(:,5:6);
+audiowrite(outname,selectedIR,Fs,"BitsPerSample",32); 
+
+% Export Behringer omni (ch7)
+outname = filename+"-omni-IR.wav";
+selectedIR = rowIR(:,7);
+audiowrite(outname,selectedIR,Fs,"BitsPerSample",32); 
+
+% Ambeo A-format to B-format
+AmbixIR = IR(1:4,:);
+AmbixIR = AmbixIR';
+AmbixIR = fd_conv(AmbixIR', MicArrayEnc);
+% Export Ambeo B-format IR
+outname = filename+"-Ambix-IR.wav";
+selectedIR = AmbixIR';
+audiowrite(outname,selectedIR,Fs,"BitsPerSample",32);
 
 % Application of Acoupar tool. Further information of this executable at https://www.angelofarina.it/Public/AcouPar/
 
